@@ -168,12 +168,12 @@ class ExcelProcessor {
         
         if (decimalPart === 0) {
             return price; // Already a whole number
-        } else if (decimalPart <= 0.49) {
-            return wholePart + 0.5; // Round to .5
-        } else if (decimalPart === 0.5) {
-            return price; // Keep as .5
+        } else if (decimalPart >= 0.01 && decimalPart <= 0.49) {
+            return wholePart + 0.5; // Round to .50
+        } else if (decimalPart >= 0.50 && decimalPart <= 0.99) {
+            return wholePart + 0.95; // Round to .95
         } else {
-            return wholePart + 1; // Round up to next whole number
+            return price; // Keep original if outside expected range
         }
     }
 
@@ -356,36 +356,46 @@ function handlePriceClick(element, priceValue, index) {
         clearTimeout(clickTimeouts[elementId]);
     }
     
-    // Set timeout to process clicks
+    // Check for triple click immediately if count reaches 3
+    if (clickCounts[elementId] === 3) {
+        // Triple click - enable editing immediately
+        enablePriceEditing(element, priceValue, index);
+        clickCounts[elementId] = 0; // Reset
+        return;
+    }
+    
+    // Set timeout to process single/double clicks
     clickTimeouts[elementId] = setTimeout(() => {
         const clickCount = clickCounts[elementId];
         
-        if (clickCount === 3) {
-            // Triple click - enable editing
-            enablePriceEditing(element, priceValue, index);
-        } else {
+        if (clickCount > 0 && clickCount < 3) {
             // Single or double click - copy to clipboard
             copyToClipboard(priceValue);
         }
         
         // Reset click count
         clickCounts[elementId] = 0;
-    }, 400); // 400ms timeout to detect triple click
+    }, 300); // Reduced timeout for better responsiveness
 }
 
 // Enable price editing
 function enablePriceEditing(element, currentPrice, index) {
+    // Prevent multiple edits on same element
+    if (element.querySelector('input')) {
+        return;
+    }
+    
+    // Add editing class
+    element.classList.add('editing');
+    
     // Create input element
     const input = document.createElement('input');
     input.type = 'number';
     input.step = '0.1';
     input.value = currentPrice;
     input.className = 'price-edit-input';
-    input.style.width = '80px';
+    input.style.width = '90px';
     input.style.textAlign = 'center';
-    input.style.border = '2px solid #3498db';
-    input.style.borderRadius = '4px';
-    input.style.padding = '5px';
     
     // Store original content
     const originalContent = element.innerHTML;
@@ -395,8 +405,10 @@ function enablePriceEditing(element, currentPrice, index) {
     element.appendChild(input);
     
     // Focus and select
-    input.focus();
-    input.select();
+    setTimeout(() => {
+        input.focus();
+        input.select();
+    }, 50);
     
     // Handle save on Enter or blur
     const saveEdit = () => {
@@ -405,6 +417,7 @@ function enablePriceEditing(element, currentPrice, index) {
         if (isNaN(newPrice) || newPrice <= 0) {
             showCopyNotification('سعر غير صحيح. يجب أن يكون رقم موجب.', 'error');
             element.innerHTML = originalContent;
+            element.classList.remove('editing');
             return;
         }
         
@@ -420,16 +433,20 @@ function enablePriceEditing(element, currentPrice, index) {
             element.setAttribute('onclick', `handlePriceClick(this, '${displayPrice}', ${index})`);
             element.setAttribute('data-original-price', displayPrice);
             
-            showCopyNotification('تم تحديث السعر بنجاح: ' + displayPrice);
+            element.classList.remove('editing');
+            showCopyNotification('✅ تم تحديث السعر: ' + displayPrice + ' جنيه');
         }
     };
     
     // Handle cancel on Escape
     const cancelEdit = () => {
         element.innerHTML = originalContent;
+        element.classList.remove('editing');
+        showCopyNotification('❌ تم إلغاء التعديل', 'warning');
     };
     
     input.addEventListener('keydown', (e) => {
+        e.stopPropagation();
         if (e.key === 'Enter') {
             saveEdit();
         } else if (e.key === 'Escape') {
@@ -438,6 +455,13 @@ function enablePriceEditing(element, currentPrice, index) {
     });
     
     input.addEventListener('blur', saveEdit);
+    
+    // Prevent click propagation
+    input.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+    
+    showCopyNotification('🔄 وضع التعديل مُفعل - اكتب السعر الجديد', 'info');
 }
 
 // Update price in processed data
@@ -449,15 +473,22 @@ function updateProcessedData(index, newPrice) {
     return false;
 }
 
-// Show copy notification
+// Show copy notification with icons
 function showCopyNotification(message, type = 'success') {
     const notification = document.getElementById('notification');
-    notification.textContent = message;
+    
+    // Add appropriate icon based on type
+    let icon = '✅';
+    if (type === 'error') icon = '❌';
+    else if (type === 'warning') icon = '⚠️';
+    else if (type === 'info') icon = 'ℹ️';
+    
+    notification.innerHTML = `<span style="margin-left: 8px;">${icon}</span>${message}`;
     notification.className = `notification ${type} show`;
     
     setTimeout(() => {
         notification.classList.remove('show');
-    }, 2000);
+    }, type === 'warning' ? 2500 : 2000);
 }
 
 // Initialize the application
