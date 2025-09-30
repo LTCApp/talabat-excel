@@ -536,13 +536,17 @@ function addCopyVisualFeedback(element) {
     element.style.position = 'relative';
     element.appendChild(indicator);
     
-    // Remove indicator and class after animation
+    // Remove indicator after animation but keep the 'copied' class longer
     setTimeout(() => {
-        element.classList.remove('copied');
         if (indicator.parentNode) {
             indicator.parentNode.removeChild(indicator);
         }
     }, 1000);
+    
+    // Remove the 'copied' class after 5 seconds to keep visual tracking longer
+    setTimeout(() => {
+        element.classList.remove('copied');
+    }, 5000);
 }
 
 // Global download function

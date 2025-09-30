@@ -1,21 +1,17 @@
 :root {
-    --primary-color: #1a365d;
-    --secondary-color: #2b77e6;
-    --accent-color: #667eea;
+    --primary-color: #2d3748;
+    --secondary-color: #4299e1;
+    --accent-color: #63b3ed;
     --success-color: #38a169;
     --warning-color: #d69e2e;
     --danger-color: #e53e3e;
-    --light-bg: #f7fafc;
+    --light-bg: #f8fafc;
     --card-bg: #ffffff;
     --text-color: #2d3748;
     --text-light: #718096;
     --border-color: #e2e8f0;
-    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --gradient-card: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 * {
@@ -29,13 +25,12 @@ html {
 }
 
 body {
-    font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: var(--gradient-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--light-bg);
     min-height: 100vh;
     color: var(--text-color);
     line-height: 1.6;
     font-size: 14px;
-    overflow-x: hidden;
 }
 
 .container {
@@ -47,30 +42,25 @@ body {
 
 header {
     text-align: center;
-    margin-bottom: 40px;
-    padding: 40px 20px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: var(--shadow-xl);
+    margin-bottom: 30px;
+    padding: 30px 20px;
+    background: var(--card-bg);
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
 }
 
 header h1 {
-    font-size: clamp(2rem, 5vw, 3rem);
-    margin-bottom: 15px;
+    font-size: clamp(2rem, 5vw, 2.5rem);
+    margin-bottom: 10px;
     font-weight: 700;
-    background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    color: var(--primary-color);
     letter-spacing: -0.02em;
 }
 
 header p {
-    font-size: clamp(1rem, 3vw, 1.25rem);
-    color: rgba(255, 255, 255, 0.9);
+    font-size: clamp(1rem, 3vw, 1.1rem);
+    color: var(--text-light);
     font-weight: 400;
     max-width: 600px;
     margin: 0 auto;
@@ -81,57 +71,43 @@ header p {
 }
 
 .upload-area {
-    background: var(--gradient-card);
+    background: var(--card-bg);
     border: 2px dashed var(--secondary-color);
-    border-radius: 20px;
-    padding: 60px 40px;
+    border-radius: 10px;
+    padding: 40px;
     text-align: center;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-    box-shadow: var(--shadow-lg);
-    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
 }
 
 .upload-area::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(45deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    display: none;
 }
 
 .upload-area:hover {
     border-color: var(--accent-color);
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-xl);
+    box-shadow: var(--shadow-md);
 }
 
 .upload-area:hover::before {
-    opacity: 1;
+    display: none;
 }
 
 .upload-area.dragover {
     border-color: var(--success-color);
-    background: linear-gradient(145deg, #f0fff4 0%, #c6f6d5 100%);
-    transform: translateY(-2px) scale(1.02);
+    background: #f0fff4;
 }
 
 .upload-icon {
-    font-size: 4rem;
-    margin-bottom: 20px;
+    font-size: 3rem;
+    margin-bottom: 15px;
     opacity: 0.8;
     display: block;
-    transition: transform 0.3s ease;
 }
 
 .upload-area:hover .upload-icon {
-    transform: scale(1.1);
+    opacity: 1;
 }
 
 .upload-area p {
@@ -142,43 +118,41 @@ header p {
 }
 
 .upload-area button {
-    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--accent-color) 100%);
+    background: var(--secondary-color);
     color: white;
     border: none;
-    padding: 15px 35px;
-    border-radius: 50px;
+    padding: 12px 24px;
+    border-radius: 8px;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: var(--shadow-md);
-    letter-spacing: 0.02em;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
 }
 
 .upload-area button:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-    filter: brightness(1.1);
+    background: var(--accent-color);
+    box-shadow: var(--shadow-md);
 }
 
 .loading {
     text-align: center;
-    padding: 50px;
-    background: var(--gradient-card);
-    border-radius: 20px;
-    margin-bottom: 50px;
-    box-shadow: var(--shadow-lg);
-    backdrop-filter: blur(10px);
+    padding: 40px;
+    background: var(--card-bg);
+    border-radius: 10px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
 }
 
 .spinner {
-    width: 50px;
-    height: 50px;
-    border: 4px solid rgba(43, 119, 230, 0.1);
-    border-top: 4px solid var(--secondary-color);
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e2e8f0;
+    border-top: 3px solid var(--secondary-color);
     border-radius: 50%;
-    animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
-    margin: 0 auto 25px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
 }
 
 @keyframes spin {
@@ -193,12 +167,11 @@ header p {
 }
 
 .results-section {
-    background: var(--gradient-card);
-    border-radius: 25px;
-    padding: 40px;
-    box-shadow: var(--shadow-xl);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
 }
 
 .results-section h2 {
@@ -219,26 +192,24 @@ header p {
 }
 
 .download-btn {
-    background: linear-gradient(135deg, var(--success-color) 0%, #48bb78 100%);
+    background: var(--success-color);
     color: white;
     border: none;
-    padding: 14px 28px;
-    border-radius: 50px;
+    padding: 12px 24px;
+    border-radius: 8px;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    gap: 10px;
-    box-shadow: var(--shadow-md);
-    letter-spacing: 0.02em;
+    gap: 8px;
+    box-shadow: var(--shadow-sm);
 }
 
 .download-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-lg);
-    filter: brightness(1.1);
+    background: #2f855a;
+    box-shadow: var(--shadow-md);
 }
 
 .download-btn:active {
@@ -246,48 +217,42 @@ header p {
 }
 
 .download-icon {
-    font-size: 1.3rem;
-    transition: transform 0.3s ease;
+    font-size: 1.1rem;
 }
 
 .download-btn:hover .download-icon {
-    transform: translateY(2px);
+    /* No animation */
 }
 
 .stats {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%);
-    padding: 30px;
-    border-radius: 20px;
-    margin-bottom: 40px;
+    background: var(--light-bg);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 25px;
-    border: 1px solid rgba(226, 232, 240, 0.5);
-    backdrop-filter: blur(10px);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    border: 1px solid var(--border-color);
 }
 
 .stat-item {
     text-align: center;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.7);
-    border-radius: 15px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid rgba(226, 232, 240, 0.3);
+    padding: 15px;
+    background: var(--card-bg);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
 }
 
 .stat-item:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-lg);
-    background: rgba(255, 255, 255, 0.9);
+    box-shadow: var(--shadow-md);
+    background: var(--card-bg);
 }
 
 .stat-number {
-    font-size: clamp(1.8rem, 4vw, 2.5rem);
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--accent-color) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-weight: 700;
+    color: var(--secondary-color);
     display: block;
     line-height: 1.2;
     margin-bottom: 8px;
@@ -303,21 +268,21 @@ header p {
 }
 
 .table-container {
-    border-radius: 20px;
-    box-shadow: var(--shadow-lg);
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
     background: var(--card-bg);
-    border: 1px solid rgba(226, 232, 240, 0.5);
+    border: 1px solid var(--border-color);
 }
 
 .table-instructions {
-    background: linear-gradient(135deg, #e6f3ff 0%, #cce7ff 100%);
-    padding: 20px;
+    background: var(--light-bg);
+    padding: 15px;
     text-align: center;
-    font-size: 0.95rem;
-    color: #1a365d;
+    font-size: 0.9rem;
+    color: var(--text-color);
     font-weight: 500;
-    border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .table-instructions strong {
@@ -362,27 +327,24 @@ th, td {
 }
 
 th {
-    background: linear-gradient(135deg, var(--primary-color) 0%, #2a4a6b 100%);
+    background: var(--primary-color);
     color: white;
-    font-weight: 700;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.05em;
     font-size: 0.85rem;
     position: sticky;
     top: 0;
     z-index: 10;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 tbody tr {
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid var(--border-color);
 }
 
 tbody tr:hover {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.02) 0%, rgba(118, 75, 162, 0.02) 100%);
-    transform: scale(1.001);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    background: var(--light-bg);
 }
 
 tbody tr:nth-child(even) {
@@ -390,41 +352,31 @@ tbody tr:nth-child(even) {
 }
 
 tbody tr:nth-child(even):hover {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
+    background: var(--light-bg);
 }
 
 .clickable {
     cursor: pointer;
-    padding: 10px 15px;
-    border-radius: 8px;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
     display: inline-block;
-    min-width: 70px;
+    min-width: 60px;
     font-weight: 600;
-    position: relative;
-    overflow: hidden;
 }
 
 .clickable::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-    transition: left 0.5s;
+    display: none;
 }
 
 .clickable:hover::before {
-    left: 100%;
+    display: none;
 }
 
 .clickable:hover {
-    background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+    background: var(--secondary-color);
     color: white;
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-sm);
 }
 
 .price-increased {
@@ -464,8 +416,8 @@ tbody tr:nth-child(even):hover {
 }
 
 .price-cell:hover {
-    background: rgba(102, 126, 234, 0.05);
-    border-radius: 8px;
+    background: rgba(66, 153, 225, 0.1);
+    border-radius: 6px;
 }
 
 .price-cell::after {
@@ -494,9 +446,11 @@ tbody tr:nth-child(even):hover {
 /* Copy visual feedback styles */
 .copied {
     background: rgba(56, 161, 105, 0.1) !important;
+    color: #a0aec0 !important; /* Light gray color for copied text */
     border-radius: 8px !important;
     transform: scale(1.05);
     transition: all 0.3s ease;
+    opacity: 0.7 !important;
 }
 
 .copy-indicator {
@@ -534,19 +488,18 @@ tbody tr:nth-child(even):hover {
 
 .notification {
     position: fixed;
-    top: 25px;
-    right: 25px;
-    padding: 16px 24px;
-    border-radius: 12px;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
     font-weight: 600;
-    font-size: 0.95rem;
-    transform: translateX(450px);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.9rem;
+    transform: translateX(400px);
+    transition: all 0.3s ease;
     z-index: 1000;
-    box-shadow: var(--shadow-lg);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    max-width: 350px;
+    box-shadow: var(--shadow-md);
+    max-width: 300px;
+    border: 1px solid var(--border-color);
 }
 
 .notification.show {
@@ -554,22 +507,22 @@ tbody tr:nth-child(even):hover {
 }
 
 .notification.error {
-    background: linear-gradient(135deg, var(--danger-color) 0%, #f56565 100%);
+    background: var(--danger-color);
     color: white;
 }
 
 .notification.warning {
-    background: linear-gradient(135deg, var(--warning-color) 0%, #ed8936 100%);
+    background: var(--warning-color);
     color: white;
 }
 
 .notification.info {
-    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--accent-color) 100%);
+    background: var(--secondary-color);
     color: white;
 }
 
 .notification:not(.error):not(.warning):not(.info) {
-    background: linear-gradient(135deg, var(--success-color) 0%, #48bb78 100%);
+    background: var(--success-color);
     color: white;
 }
 
@@ -579,8 +532,8 @@ tbody tr:nth-child(even):hover {
     }
     
     header {
-        padding: 30px 15px;
-        margin-bottom: 30px;
+        padding: 20px 15px;
+        margin-bottom: 20px;
     }
     
     header h1 {
@@ -592,12 +545,12 @@ tbody tr:nth-child(even):hover {
     }
     
     .upload-area {
-        padding: 40px 20px;
+        padding: 30px 20px;
     }
     
     .results-section {
-        padding: 25px;
-        border-radius: 20px;
+        padding: 20px;
+        border-radius: 8px;
     }
     
     .results-header {
