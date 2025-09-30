@@ -111,13 +111,20 @@ class ExcelProcessor {
                     return;
                 }
 
-                // Calculate new price
+                // Calculate new price with different percentages based on original price
                 let newPrice = unitPrice;
                 let priceIncreased = false;
+                let percentage = 0;
 
-                // Add 7.5% if section is not 52
+                // Add percentage if section is not 52
                 if (section != 52) {
-                    newPrice = unitPrice * 1.075;
+                    if (unitPrice >= 150) {
+                        percentage = 7; // 7% for prices >= 150
+                        newPrice = unitPrice * 1.07;
+                    } else {
+                        percentage = 7.5; // 7.5% for prices < 150
+                        newPrice = unitPrice * 1.075;
+                    }
                     priceIncreased = true;
                     priceIncreasedCount++;
                 }
@@ -131,18 +138,26 @@ class ExcelProcessor {
                     originalPrice: unitPrice,
                     newPrice: newPrice,
                     priceIncreased: priceIncreased,
-                    section: section
+                    section: section,
+                    percentage: percentage,
+                    index: this.processedData.length // Add index for tracking
                 });
             } catch (error) {
                 console.warn(`خطأ في السطر ${index + 2}:`, error);
             }
         });
 
+        // Calculate percentage statistics
+        const sevenPercentCount = this.processedData.filter(item => item.percentage === 7).length;
+        const sevenFivePercentCount = this.processedData.filter(item => item.percentage === 7.5).length;
+
         this.stats = {
             total: this.processedData.length,
             removed: removedCount,
             priceIncreased: priceIncreasedCount,
-            originalTotal: dataRows.length
+            originalTotal: dataRows.length,
+            sevenPercent: sevenPercentCount,
+            sevenFivePercent: sevenFivePercentCount
         };
     }
 
@@ -179,8 +194,12 @@ class ExcelProcessor {
                 <div class="stat-label">السطور المعروضة</div>
             </div>
             <div class="stat-item">
-                <span class="stat-number">${this.stats.priceIncreased}</span>
-                <div class="stat-label">الأسعار المعدلة (+7.5%)</div>
+                <span class="stat-number">${this.stats.sevenPercent}</span>
+                <div class="stat-label">زيادة 7% (أسعار ≥ 150)</div>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">${this.stats.sevenFivePercent}</span>
+                <div class="stat-label">زيادة 7.5% (أسعار < 150)</div>
             </div>
         `;
 
@@ -203,7 +222,10 @@ class ExcelProcessor {
                 </td>
                 <td>${item.itemName}</td>
                 <td>
-                    <span class="clickable ${priceClass}" onclick="copyToClipboard('${priceDisplay}')">
+                    <span class="clickable ${priceClass} price-cell" 
+                          data-index="${index}" 
+                          data-original-price="${priceDisplay}"
+                          onclick="handlePriceClick(this, '${priceDisplay}', ${index})">
                         ${priceDisplay}
                     </span>
                 </td>
@@ -270,6 +292,10 @@ class ExcelProcessor {
     }
 }
 
+// Global variables for click tracking
+let clickTimeouts = {};
+let clickCounts = {};
+
 // Global variable to access processor instance
 let processorInstance = null;
 
@@ -312,6 +338,115 @@ function fallbackCopyTextToClipboard(text) {
     }
     
     document.body.removeChild(textArea);
+}
+
+// Handle price cell clicks (1-2 clicks = copy, 3 clicks = edit)
+function handlePriceClick(element, priceValue, index) {
+    const elementId = `price_${index}`;
+    
+    // Initialize click count if not exists
+    if (!clickCounts[elementId]) {
+        clickCounts[elementId] = 0;
+    }
+    
+    clickCounts[elementId]++;
+    
+    // Clear previous timeout
+    if (clickTimeouts[elementId]) {
+        clearTimeout(clickTimeouts[elementId]);
+    }
+    
+    // Set timeout to process clicks
+    clickTimeouts[elementId] = setTimeout(() => {
+        const clickCount = clickCounts[elementId];
+        
+        if (clickCount === 3) {
+            // Triple click - enable editing
+            enablePriceEditing(element, priceValue, index);
+        } else {
+            // Single or double click - copy to clipboard
+            copyToClipboard(priceValue);
+        }
+        
+        // Reset click count
+        clickCounts[elementId] = 0;
+    }, 400); // 400ms timeout to detect triple click
+}
+
+// Enable price editing
+function enablePriceEditing(element, currentPrice, index) {
+    // Create input element
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.step = '0.1';
+    input.value = currentPrice;
+    input.className = 'price-edit-input';
+    input.style.width = '80px';
+    input.style.textAlign = 'center';
+    input.style.border = '2px solid #3498db';
+    input.style.borderRadius = '4px';
+    input.style.padding = '5px';
+    
+    // Store original content
+    const originalContent = element.innerHTML;
+    
+    // Replace span content with input
+    element.innerHTML = '';
+    element.appendChild(input);
+    
+    // Focus and select
+    input.focus();
+    input.select();
+    
+    // Handle save on Enter or blur
+    const saveEdit = () => {
+        const newPrice = parseFloat(input.value);
+        
+        if (isNaN(newPrice) || newPrice <= 0) {
+            showCopyNotification('سعر غير صحيح. يجب أن يكون رقم موجب.', 'error');
+            element.innerHTML = originalContent;
+            return;
+        }
+        
+        // Update the processed data
+        if (processorInstance && processorInstance.processedData[index]) {
+            processorInstance.processedData[index].newPrice = newPrice;
+            
+            // Update display
+            const displayPrice = newPrice % 1 === 0 ? newPrice.toString() : newPrice.toFixed(1);
+            element.innerHTML = displayPrice;
+            
+            // Update onclick attribute
+            element.setAttribute('onclick', `handlePriceClick(this, '${displayPrice}', ${index})`);
+            element.setAttribute('data-original-price', displayPrice);
+            
+            showCopyNotification('تم تحديث السعر بنجاح: ' + displayPrice);
+        }
+    };
+    
+    // Handle cancel on Escape
+    const cancelEdit = () => {
+        element.innerHTML = originalContent;
+    };
+    
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            saveEdit();
+        } else if (e.key === 'Escape') {
+            cancelEdit();
+        }
+    });
+    
+    input.addEventListener('blur', saveEdit);
+}
+
+// Update price in processed data
+function updateProcessedData(index, newPrice) {
+    if (processorInstance && processorInstance.processedData[index]) {
+        processorInstance.processedData[index].newPrice = newPrice;
+        return true;
+    }
+    return false;
 }
 
 // Show copy notification

@@ -212,6 +212,20 @@ header p {
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
+.table-instructions {
+    background: #e8f4fd;
+    padding: 15px;
+    border-radius: 8px 8px 0 0;
+    border: 1px solid #bee5eb;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #0c5460;
+}
+
+.table-instructions strong {
+    color: #155724;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -312,6 +326,11 @@ tbody tr:hover {
         padding: 10px 8px;
         font-size: 0.9rem;
     }
+    
+    .table-instructions {
+        padding: 10px;
+        font-size: 0.8rem;
+    }
 }
 
 .price-increased {
@@ -322,4 +341,22 @@ tbody tr:hover {
 .price-original {
     color: var(--primary-color);
     font-weight: bold;
+}
+
+.price-edit-input {
+    font-family: inherit;
+    font-size: inherit;
+    background: #f8f9fa;
+    outline: none;
+}
+
+.price-cell {
+    position: relative;
+    min-width: 70px;
+    display: inline-block;
+}
+
+.price-cell:hover {
+    background: var(--light-bg);
+    border-radius: 4px;
 }
