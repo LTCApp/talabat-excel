@@ -163,17 +163,25 @@ class ExcelProcessor {
 
     // Custom rounding function
     customRound(price) {
-        const wholePart = Math.floor(price);
-        const decimalPart = price - wholePart;
+        // Round to 2 decimal places first to avoid floating point precision issues
+        const roundedPrice = Math.round(price * 100) / 100;
+        const wholePart = Math.floor(roundedPrice);
+        const decimalPart = roundedPrice - wholePart;
         
+        // If already a whole number, return as is
         if (decimalPart === 0) {
-            return price; // Already a whole number
-        } else if (decimalPart >= 0.01 && decimalPart <= 0.49) {
-            return wholePart + 0.5; // Round to .50
+            return roundedPrice;
+        }
+        
+        // Round decimal part based on the rules:
+        // 0.01-0.49 -> 0.50
+        // 0.50-0.99 -> 0.95
+        if (decimalPart >= 0.01 && decimalPart < 0.50) {
+            return wholePart + 0.50;
         } else if (decimalPart >= 0.50 && decimalPart <= 0.99) {
-            return wholePart + 0.95; // Round to .95
+            return wholePart + 0.95;
         } else {
-            return price; // Keep original if outside expected range
+            return roundedPrice; // Keep original if outside expected range
         }
     }
 
