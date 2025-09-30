@@ -122,6 +122,9 @@ class ExcelProcessor {
                     priceIncreasedCount++;
                 }
 
+                // Apply custom rounding
+                newPrice = this.customRound(newPrice);
+
                 this.processedData.push({
                     itemCode: itemCode || '',
                     itemName: itemName || '',
@@ -141,6 +144,22 @@ class ExcelProcessor {
             priceIncreased: priceIncreasedCount,
             originalTotal: dataRows.length
         };
+    }
+
+    // Custom rounding function
+    customRound(price) {
+        const wholePart = Math.floor(price);
+        const decimalPart = price - wholePart;
+        
+        if (decimalPart === 0) {
+            return price; // Already a whole number
+        } else if (decimalPart <= 0.49) {
+            return wholePart + 0.5; // Round to .5
+        } else if (decimalPart === 0.5) {
+            return price; // Keep as .5
+        } else {
+            return wholePart + 1; // Round up to next whole number
+        }
     }
 
     displayResults() {
@@ -173,7 +192,8 @@ class ExcelProcessor {
             const row = document.createElement('tr');
             
             const priceClass = item.priceIncreased ? 'price-increased' : 'price-original';
-            const priceDisplay = item.newPrice.toFixed(2);
+            // Display price: if it's a whole number, show without decimals, otherwise show with 1 decimal
+            const priceDisplay = item.newPrice % 1 === 0 ? item.newPrice.toString() : item.newPrice.toFixed(1);
             
             row.innerHTML = `
                 <td>
@@ -211,7 +231,47 @@ class ExcelProcessor {
             notification.classList.remove('show');
         }, 3000);
     }
+
+    // Export processed data to Excel
+    exportToExcel() {
+        if (this.processedData.length === 0) {
+            this.showNotification('لا توجد بيانات للتصدير', 'error');
+            return;
+        }
+
+        // Prepare data for export
+        const exportData = [
+            ['كود الصنف', 'اسم الصنف', 'سعر الوحدة'] // Header
+        ];
+
+        this.processedData.forEach(item => {
+            const priceDisplay = item.newPrice % 1 === 0 ? item.newPrice.toString() : item.newPrice.toFixed(1);
+            exportData.push([
+                item.itemCode,
+                item.itemName,
+                parseFloat(priceDisplay)
+            ]);
+        });
+
+        // Create workbook
+        const ws = XLSX.utils.aoa_to_sheet(exportData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'الأصناف المعدلة');
+
+        // Generate filename with timestamp
+        const now = new Date();
+        const timestamp = now.toISOString().slice(0, 19).replace(/[:.]/g, '-');
+        const filename = `الأصناف_المعدلة_${timestamp}.xlsx`;
+
+        // Download file
+        XLSX.writeFile(wb, filename);
+        
+        this.showNotification('تم تحميل الملف بنجاح', 'success');
+    }
 }
+
+// Global variable to access processor instance
+let processorInstance = null;
 
 // Copy to clipboard function
 function copyToClipboard(text) {
@@ -267,5 +327,12 @@ function showCopyNotification(message, type = 'success') {
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
-    new ExcelProcessor();
+    processorInstance = new ExcelProcessor();
 });
+
+// Global download function
+function downloadExcel() {
+    if (processorInstance) {
+        processorInstance.exportToExcel();
+    }
+}

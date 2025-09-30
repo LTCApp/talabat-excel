@@ -29,7 +29,13 @@
         </div>
 
         <div class="results-section" id="resultsSection" style="display: none;">
-            <h2>النتائج</h2>
+            <div class="results-header">
+                <h2>النتائج</h2>
+                <button class="download-btn" id="downloadBtn" onclick="downloadExcel()">
+                    <span class="download-icon">⬇️</span>
+                    تحميل ملف Excel
+                </button>
+            </div>
             <div class="stats" id="stats"></div>
             <div class="table-container">
                 <table id="resultsTable">
