@@ -163,26 +163,51 @@ class ExcelProcessor {
 
     // Custom rounding function
     customRound(price) {
-        // Round to 2 decimal places first to avoid floating point precision issues
-        const roundedPrice = Math.round(price * 100) / 100;
-        const wholePart = Math.floor(roundedPrice);
-        const decimalPart = roundedPrice - wholePart;
+        // Convert to number to avoid any string issues
+        const numPrice = Number(price);
+        
+        // Get the whole part and decimal part
+        const wholePart = Math.floor(numPrice);
+        const decimalPart = numPrice - wholePart;
         
         // If already a whole number, return as is
         if (decimalPart === 0) {
-            return roundedPrice;
+            return numPrice;
         }
         
         // Round decimal part based on the rules:
         // 0.01-0.49 -> 0.50
         // 0.50-0.99 -> 0.95
-        if (decimalPart >= 0.01 && decimalPart < 0.50) {
+        if (decimalPart > 0 && decimalPart < 0.50) {
             return wholePart + 0.50;
-        } else if (decimalPart >= 0.50 && decimalPart <= 0.99) {
+        } else if (decimalPart >= 0.50) {
             return wholePart + 0.95;
         } else {
-            return roundedPrice; // Keep original if outside expected range
+            return numPrice;
         }
+    }
+
+    // Format price for display without additional rounding
+    formatPrice(price) {
+        // If it's a whole number, show without decimals
+        if (price % 1 === 0) {
+            return price.toString();
+        }
+        
+        // For decimal numbers, check if it ends with .5 or .95
+        const priceStr = price.toString();
+        if (priceStr.includes('.')) {
+            const decimalPart = priceStr.split('.')[1];
+            if (decimalPart === '5') {
+                return price.toString() + '0'; // Make .5 into .50
+            } else if (decimalPart === '95') {
+                return price.toString(); // Keep .95 as is
+            } else {
+                // For other decimals, format to 2 places but avoid over-rounding
+                return parseFloat(price.toFixed(2)).toString();
+            }
+        }
+        return price.toString();
     }
 
     displayResults() {
@@ -219,8 +244,8 @@ class ExcelProcessor {
             const row = document.createElement('tr');
             
             const priceClass = item.priceIncreased ? 'price-increased' : 'price-original';
-            // Display price: if it's a whole number, show without decimals, otherwise show with 2 decimals
-            const priceDisplay = item.newPrice % 1 === 0 ? item.newPrice.toString() : item.newPrice.toFixed(2);
+            // Display price: ensure custom rounding is preserved without additional rounding
+            const priceDisplay = this.formatPrice(item.newPrice);
             
             row.innerHTML = `
                 <td>
@@ -275,7 +300,7 @@ class ExcelProcessor {
         ];
 
         this.processedData.forEach(item => {
-            const priceDisplay = item.newPrice % 1 === 0 ? item.newPrice.toString() : item.newPrice.toFixed(2);
+            const priceDisplay = this.formatPrice(item.newPrice);
             exportData.push([
                 item.itemCode,
                 item.itemName,
@@ -436,7 +461,7 @@ function enablePriceEditing(element, currentPrice, index) {
             processorInstance.processedData[index].newPrice = newPrice;
             
             // Update display
-            const displayPrice = newPrice % 1 === 0 ? newPrice.toString() : newPrice.toFixed(2);
+            const displayPrice = processorInstance.formatPrice(newPrice);
             element.innerHTML = displayPrice;
             
             // Update onclick attribute
@@ -506,9 +531,9 @@ document.addEventListener('DOMContentLoaded', () => {
     processorInstance = new ExcelProcessor();
 });
 
-// Add visual feedback for copy action
+// Add visual feedback for copy action - permanent until page refresh
 function addCopyVisualFeedback(element) {
-    // Add temporary copy indicator
+    // Add permanent copy indicator
     element.classList.add('copied');
     
     // Create temporary indicator
@@ -536,17 +561,14 @@ function addCopyVisualFeedback(element) {
     element.style.position = 'relative';
     element.appendChild(indicator);
     
-    // Remove indicator after animation but keep the 'copied' class longer
+    // Remove indicator after animation but keep the 'copied' class permanently
     setTimeout(() => {
         if (indicator.parentNode) {
             indicator.parentNode.removeChild(indicator);
         }
     }, 1000);
     
-    // Remove the 'copied' class after 5 seconds to keep visual tracking longer
-    setTimeout(() => {
-        element.classList.remove('copied');
-    }, 5000);
+    // DO NOT remove the 'copied' class - keep it permanent until page refresh
 }
 
 // Global download function
