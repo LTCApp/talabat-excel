@@ -211,12 +211,12 @@ class ExcelProcessor {
             const row = document.createElement('tr');
             
             const priceClass = item.priceIncreased ? 'price-increased' : 'price-original';
-            // Display price: if it's a whole number, show without decimals, otherwise show with 1 decimal
-            const priceDisplay = item.newPrice % 1 === 0 ? item.newPrice.toString() : item.newPrice.toFixed(1);
+            // Display price: if it's a whole number, show without decimals, otherwise show with 2 decimals
+            const priceDisplay = item.newPrice % 1 === 0 ? item.newPrice.toString() : item.newPrice.toFixed(2);
             
             row.innerHTML = `
                 <td>
-                    <span class="clickable" onclick="copyToClipboard('${item.itemCode}')">
+                    <span class="clickable" onclick="copyToClipboard('${item.itemCode}', this)">
                         ${item.itemCode}
                     </span>
                 </td>
@@ -267,7 +267,7 @@ class ExcelProcessor {
         ];
 
         this.processedData.forEach(item => {
-            const priceDisplay = item.newPrice % 1 === 0 ? item.newPrice.toString() : item.newPrice.toFixed(1);
+            const priceDisplay = item.newPrice % 1 === 0 ? item.newPrice.toString() : item.newPrice.toFixed(2);
             exportData.push([
                 item.itemCode,
                 item.itemName,
@@ -299,22 +299,23 @@ let clickCounts = {};
 // Global variable to access processor instance
 let processorInstance = null;
 
-// Copy to clipboard function
-function copyToClipboard(text) {
+// Copy to clipboard function with visual feedback
+function copyToClipboard(text, element = null) {
     if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(text).then(() => {
             showCopyNotification('تم نسخ النص: ' + text);
+            if (element) addCopyVisualFeedback(element);
         }).catch(err => {
             console.error('فشل في النسخ:', err);
-            fallbackCopyTextToClipboard(text);
+            fallbackCopyTextToClipboard(text, element);
         });
     } else {
-        fallbackCopyTextToClipboard(text);
+        fallbackCopyTextToClipboard(text, element);
     }
 }
 
 // Fallback copy function for older browsers
-function fallbackCopyTextToClipboard(text) {
+function fallbackCopyTextToClipboard(text, element = null) {
     const textArea = document.createElement('textarea');
     textArea.value = text;
     textArea.style.top = '0';
@@ -329,6 +330,7 @@ function fallbackCopyTextToClipboard(text) {
         const successful = document.execCommand('copy');
         if (successful) {
             showCopyNotification('تم نسخ النص: ' + text);
+            if (element) addCopyVisualFeedback(element);
         } else {
             showCopyNotification('فشل في النسخ', 'error');
         }
@@ -370,7 +372,7 @@ function handlePriceClick(element, priceValue, index) {
         
         if (clickCount > 0 && clickCount < 3) {
             // Single or double click - copy to clipboard
-            copyToClipboard(priceValue);
+            copyToClipboard(priceValue, element);
         }
         
         // Reset click count
@@ -426,7 +428,7 @@ function enablePriceEditing(element, currentPrice, index) {
             processorInstance.processedData[index].newPrice = newPrice;
             
             // Update display
-            const displayPrice = newPrice % 1 === 0 ? newPrice.toString() : newPrice.toFixed(1);
+            const displayPrice = newPrice % 1 === 0 ? newPrice.toString() : newPrice.toFixed(2);
             element.innerHTML = displayPrice;
             
             // Update onclick attribute
@@ -495,6 +497,45 @@ function showCopyNotification(message, type = 'success') {
 document.addEventListener('DOMContentLoaded', () => {
     processorInstance = new ExcelProcessor();
 });
+
+// Add visual feedback for copy action
+function addCopyVisualFeedback(element) {
+    // Add temporary copy indicator
+    element.classList.add('copied');
+    
+    // Create temporary indicator
+    const indicator = document.createElement('span');
+    indicator.className = 'copy-indicator';
+    indicator.innerHTML = '✅';
+    indicator.style.cssText = `
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: var(--success-color);
+        color: white;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        z-index: 100;
+        animation: copyPulse 0.6s ease-out;
+    `;
+    
+    // Add indicator to element
+    element.style.position = 'relative';
+    element.appendChild(indicator);
+    
+    // Remove indicator and class after animation
+    setTimeout(() => {
+        element.classList.remove('copied');
+        if (indicator.parentNode) {
+            indicator.parentNode.removeChild(indicator);
+        }
+    }, 1000);
+}
 
 // Global download function
 function downloadExcel() {

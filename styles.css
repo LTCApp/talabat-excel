@@ -326,8 +326,6 @@ header p {
 }
 
 .table-wrapper {
-    max-height: 70vh;
-    overflow-y: auto;
     overflow-x: hidden;
 }
 
@@ -493,6 +491,33 @@ tbody tr:nth-child(even):hover {
     opacity: 1;
 }
 
+/* Copy visual feedback styles */
+.copied {
+    background: rgba(56, 161, 105, 0.1) !important;
+    border-radius: 8px !important;
+    transform: scale(1.05);
+    transition: all 0.3s ease;
+}
+
+.copy-indicator {
+    animation: copyPulse 0.6s ease-out;
+}
+
+@keyframes copyPulse {
+    0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2) rotate(180deg);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1) rotate(360deg);
+        opacity: 1;
+    }
+}
+
 /* Smooth animations for better UX */
 .clickable, .price-cell {
     -webkit-tap-highlight-color: transparent;
@@ -598,7 +623,7 @@ tbody tr:nth-child(even):hover {
     }
     
     .table-wrapper {
-        max-height: 60vh;
+        overflow-x: hidden;
     }
     
     th, td {
